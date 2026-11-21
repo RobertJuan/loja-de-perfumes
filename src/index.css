@@ -1,0 +1,103 @@
+/* ===== RESET GLOBAL ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  background-color: #FEF1CF;
+  color: #0032A8;
+  min-height: 100vh;
+}
+
+/* ===== PALETA DE CORES ===== */
+:root {
+  --primary: #FC3B7F;
+  --secondary: #FEF1CF;
+  --tertiary: #0032A8;
+
+  --pink-light: #FFE0EB;
+  --pink-dark: #E92368;
+  --white: #FFFFFF;
+}
+
+/* ===== ELEMENTOS GERAIS ===== */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  outline: none;
+}
+
+/* ===== BOTÕES ===== */
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--white);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: var(--tertiary);
+  color: var(--white);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-secondary:hover {
+  opacity: 0.85;
+}
+
+/* ===== CARDS ===== */
+.card {
+  background-color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 50, 168, 0.05);
+}
+
+/* ===== TÍTULOS ===== */
+h1, h2, h3 {
+  color: var(--tertiary);
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* ===== LINKS ===== */
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* ===== SELEÇÃO DE TEXTO ===== */
+::selection {
+  background-color: var(--primary);
+  color: var(--white);}
