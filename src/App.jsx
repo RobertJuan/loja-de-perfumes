@@ -2,8 +2,11 @@
 import { useState } from 'react';
 import './App.css';
 
+// ==========================================
+// PRODUTOS DA LOJA
+// ==========================================
+
 const produtos = [
-  // NATURA HOMEM
   {
     id: 1,
     nome: 'Natura Homem Neo',
@@ -40,8 +43,6 @@ const produtos = [
     imagem: '/imagens/homem-sagaz.jpg',
     descricao: 'Uma fragrância para marcar presença.'
   },
-
-  // ESSENCIAL MASCULINO
   {
     id: 4,
     nome: 'Essencial Sentir',
@@ -78,8 +79,6 @@ const produtos = [
     imagem: '/imagens/essencial-oud-masculino.jpg',
     descricao: 'Uma fragrância intensa e sofisticada.'
   },
-
-  // ESSENCIAL FEMININO
   {
     id: 7,
     nome: 'Essencial Feminino',
@@ -118,12 +117,16 @@ const produtos = [
   }
 ];
 
+// ==========================================
+// COMPONENTE PRINCIPAL
+// ==========================================
+
 function App() {
   const [carrinho, setCarrinho] = useState([]);
   const [busca, setBusca] = useState('');
   const [categoriaSelecionada, setCategoriaSelecionada] = useState('Todos');
 
-  // FORMATAÇÃO DE PREÇO
+  // FORMATAR PREÇOS
   function formatarPreco(valor) {
     return valor.toLocaleString('pt-BR', {
       style: 'currency',
@@ -131,7 +134,7 @@ function App() {
     });
   }
 
-  // ADICIONAR AO CARRINHO
+  // ADICIONAR PRODUTO AO CARRINHO
   function adicionarAoCarrinho(produto) {
     setCarrinho((carrinhoAtual) => {
       const produtoExistente = carrinhoAtual.find(
@@ -153,12 +156,45 @@ function App() {
     });
   }
 
-  // REMOVER DO CARRINHO
+  // REMOVER PRODUTO DO CARRINHO
   function removerDoCarrinho(id) {
     setCarrinho((carrinhoAtual) =>
       carrinhoAtual.filter((item) => item.id !== id)
     );
   }
+
+  // ALTERAR CATEGORIA
+  function selecionarCategoria(categoria) {
+    setCategoriaSelecionada(categoria);
+  }
+
+  // QUANTIDADE DE PRODUTOS NO CARRINHO
+  const quantidadeCarrinho = carrinho.reduce(
+    (total, item) => total + item.quantidade,
+    0
+  );
+
+  // VALOR TOTAL DA COMPRA
+  const totalCarrinho = carrinho.reduce(
+    (total, item) => total + item.preco * item.quantidade,
+    0
+  );
+
+  // FILTRAR PRODUTOS
+  const produtosFiltrados = produtos.filter((produto) => {
+    const termo = busca.trim().toLowerCase();
+
+    const correspondeBusca =
+      produto.nome.toLowerCase().includes(termo) ||
+      produto.marca.toLowerCase().includes(termo) ||
+      produto.linha.toLowerCase().includes(termo);
+
+    const correspondeCategoria =
+      categoriaSelecionada === 'Todos' ||
+      produto.categoria === categoriaSelecionada;
+
+    return correspondeBusca && correspondeCategoria;
+  });
 
   // FINALIZAR COMPRA PELO WHATSAPP
   function finalizarCompra() {
@@ -170,118 +206,130 @@ function App() {
     const numeroWhatsApp = '5588981680487';
 
     const itensPedido = carrinho.map((item) => {
-      return `• ${item.nome}
-Quantidade: ${item.quantidade}
-Valor: ${formatarPreco(item.preco * item.quantidade)}`;
+      return (
+        `• ${item.nome}\n` +
+        `Quantidade: ${item.quantidade}\n` +
+        `Valor: ${formatarPreco(item.preco * item.quantidade)}`
+      );
     });
 
-    const mensagem = `
-Olá! Gostaria de fazer um pedido na Ana Paula Perfumes.
+    const mensagem =
+      `Olá! Gostaria de fazer um pedido na Ana Paula Perfumes.\n\n` +
+      `MEU PEDIDO:\n\n${itensPedido.join('\n\n')}\n\n` +
+      `TOTAL: ${formatarPreco(totalCarrinho)}\n\n` +
+      `Aguardo a confirmação do pedido!`;
 
-MEU PEDIDO:
+    const link =
+      `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
 
-${itensPedido.join('\n\n')}
-
-TOTAL: ${formatarPreco(totalCarrinho)}
-
-Aguardo a confirmação do pedido!
-    `;
-
-    const mensagemCodificada = encodeURIComponent(mensagem);
-    const link = `https://wa.me/${numeroWhatsApp}?text=${mensagemCodificada}`;
-
-    window.open(link, '_blank');
+    window.open(link, '_blank', 'noopener,noreferrer');
   }
 
-  // FILTRAR PRODUTOS
-  const produtosFiltrados = produtos.filter((produto) => {
-    const correspondeBusca =
-      produto.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      produto.marca.toLowerCase().includes(busca.toLowerCase());
-
-    const correspondeCategoria =
-      categoriaSelecionada === 'Todos' ||
-      produto.categoria === categoriaSelecionada;
-
-    return correspondeBusca && correspondeCategoria;
-  });
-
-  // QUANTIDADE TOTAL DO CARRINHO
-  const quantidadeCarrinho = carrinho.reduce(
-    (total, item) => total + item.quantidade,
-    0
-  );
-
-  // VALOR TOTAL DO CARRINHO
-  const totalCarrinho = carrinho.reduce(
-    (total, item) => total + item.preco * item.quantidade,
-    0
-  );
+  // ==========================================
+  // ESTRUTURA VISUAL
+  // ==========================================
 
   return (
     <div className="store">
 
-      {/* HEADER */}
+      {/* CABEÇALHO */}
+
       <header className="header">
+
         <div className="logo">
-          <h1>ANA PAULA <span>PERFUMES</span></h1>
+          <h1>
+            ANA PAULA <span>PERFUMES</span>
+          </h1>
+
           <p>Perfume é a sua essência.</p>
         </div>
 
-        <div className="search">
+        <form
+          className="search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            document.getElementById('produtos')?.scrollIntoView({
+              behavior: 'smooth'
+            });
+          }}
+        >
           <input
-            type="text"
+            type="search"
             placeholder="Pesquise seu perfume favorito..."
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
           />
 
-          <button>Buscar</button>
-        </div>
+          <button type="submit">
+            Buscar
+          </button>
+        </form>
 
         <div className="header-actions">
-          <a href="#produtos">Produtos</a>
+          <a href="#produtos">
+            Produtos
+          </a>
+
           <a href="#carrinho">
             🛍️ Carrinho ({quantidadeCarrinho})
           </a>
         </div>
+
       </header>
 
-      {/* MENU */}
+      {/* MENU DE NAVEGAÇÃO */}
+
       <nav className="menu">
-        <a href="#">Início</a>
-        <a href="#produtos">Todos os perfumes</a>
+
+        <a href="#inicio">
+          Início
+        </a>
 
         <a
           href="#produtos"
-          onClick={() => setCategoriaSelecionada('Feminino')}
+          onClick={() => selecionarCategoria('Todos')}
+        >
+          Todos os perfumes
+        </a>
+
+        <a
+          href="#produtos"
+          onClick={() => selecionarCategoria('Feminino')}
         >
           Femininos
         </a>
 
         <a
           href="#produtos"
-          onClick={() => setCategoriaSelecionada('Masculino')}
+          onClick={() => selecionarCategoria('Masculino')}
         >
           Masculinos
         </a>
 
         <a
           href="#produtos"
-          onClick={() => setCategoriaSelecionada('Todos')}
+          onClick={() => selecionarCategoria('Todos')}
         >
           Ver todos
         </a>
+
       </nav>
 
       <main>
 
-        {/* BANNER */}
-        <section className="hero">
-          <div className="hero-content">
-            <span className="tag">ANA PAULA PERFUMES</span>
+        {/* BANNER PRINCIPAL */}
 
-            <h2>Uma fragrância especial transforma momentos.</h2>
+        <section className="hero" id="inicio">
+
+          <div className="hero-content">
+
+            <span className="tag">
+              ANA PAULA PERFUMES
+            </span>
+
+            <h2>
+              Uma fragrância especial transforma momentos.
+            </h2>
 
             <p>
               Descubra perfumes que combinam com sua personalidade,
@@ -291,112 +339,153 @@ Aguardo a confirmação do pedido!
             <a href="#produtos" className="btn-primary">
               Explorar perfumes
             </a>
+
           </div>
+
         </section>
 
         {/* CATEGORIAS */}
+
         <section className="categories">
-          <h2>Encontre sua essência</h2>
+
+          <h2>
+            Encontre sua essência
+          </h2>
 
           <div className="category-grid">
-            <div
+
+            <button
+              type="button"
               className="category-card"
-              onClick={() => setCategoriaSelecionada('Feminino')}
+              onClick={() => selecionarCategoria('Feminino')}
             >
-              🌸
+              <span>🌸</span>
               <h3>Femininos</h3>
-            </div>
+            </button>
 
-            <div
+            <button
+              type="button"
               className="category-card"
-              onClick={() => setCategoriaSelecionada('Masculino')}
+              onClick={() => selecionarCategoria('Masculino')}
             >
-              🖤
+              <span>🖤</span>
               <h3>Masculinos</h3>
-            </div>
+            </button>
 
-            <div
+            <button
+              type="button"
               className="category-card"
-              onClick={() => setCategoriaSelecionada('Todos')}
+              onClick={() => selecionarCategoria('Todos')}
             >
-              ✨
+              <span>✨</span>
               <h3>Todos os perfumes</h3>
-            </div>
+            </button>
 
-            <div
+            <button
+              type="button"
               className="category-card"
               onClick={() => {
                 setBusca('');
-                setCategoriaSelecionada('Todos');
+                selecionarCategoria('Todos');
               }}
             >
-              🎁
+              <span>🎁</span>
               <h3>Ver novidades</h3>
-            </div>
+            </button>
+
           </div>
+
         </section>
 
-        {/* PRODUTOS */}
+        {/* VITRINE DE PRODUTOS */}
+
         <section className="products" id="produtos">
+
           <div className="section-heading">
+
             <div>
               <h2>Nossos perfumes</h2>
-              <p>Encontre a fragrância perfeita para você.</p>
+
+              <p>
+                Encontre a fragrância perfeita para você.
+              </p>
             </div>
 
-            <span>{produtosFiltrados.length} produtos</span>
+            <span>
+              {produtosFiltrados.length} produtos
+            </span>
+
           </div>
 
           {/* FILTROS */}
+
           <div className="filters">
+
             <button
+              type="button"
               className={categoriaSelecionada === 'Todos' ? 'active' : ''}
-              onClick={() => setCategoriaSelecionada('Todos')}
+              onClick={() => selecionarCategoria('Todos')}
             >
               Todos
             </button>
 
             <button
+              type="button"
               className={categoriaSelecionada === 'Feminino' ? 'active' : ''}
-              onClick={() => setCategoriaSelecionada('Feminino')}
+              onClick={() => selecionarCategoria('Feminino')}
             >
               Femininos
             </button>
 
             <button
+              type="button"
               className={categoriaSelecionada === 'Masculino' ? 'active' : ''}
-              onClick={() => setCategoriaSelecionada('Masculino')}
+              onClick={() => selecionarCategoria('Masculino')}
             >
               Masculinos
             </button>
+
           </div>
 
-          {/* LISTA DE PRODUTOS */}
-          <div className="product-grid">
-            {produtosFiltrados.map((produto) => (
-              <div className="product-card" key={produto.id}>
+          {/* CARDS DOS PRODUTOS */}
 
-                {/* IMAGEM DO PERFUME */}
+          <div className="product-grid">
+
+            {produtosFiltrados.map((produto) => (
+
+              <article
+                className="product-card"
+                key={produto.id}
+              >
+
                 <div className="product-image">
+
                   <img
                     src={produto.imagem}
                     alt={produto.nome}
+                    loading="lazy"
                   />
+
                 </div>
 
                 <span className="product-tag">
                   {produto.categoria}
                 </span>
 
-                <h3>{produto.nome}</h3>
+                <h3>
+                  {produto.nome}
+                </h3>
 
                 <p className="product-brand">
                   {produto.marca}
                 </p>
 
-                <p>{produto.descricao}</p>
+                <p>
+                  {produto.descricao}
+                </p>
 
                 <div className="product-prices">
+
                   <span className="old-price">
                     {formatarPreco(produto.precoOriginal)}
                   </span>
@@ -410,133 +499,237 @@ Aguardo a confirmação do pedido!
                       (1 - produto.preco / produto.precoOriginal) * 100
                     )}% OFF
                   </span>
+
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => adicionarAoCarrinho(produto)}
                 >
                   Adicionar ao carrinho
                 </button>
-              </div>
+
+              </article>
+
             ))}
 
             {produtosFiltrados.length === 0 && (
-              <p>Nenhum perfume encontrado.</p>
+              <p>
+                Nenhum perfume encontrado.
+              </p>
             )}
+
           </div>
+
         </section>
 
-        {/* CARRINHO */}
+        {/* CARRINHO DE COMPRAS */}
+
         <section className="cart-section" id="carrinho">
-          <h2>Minha sacola</h2>
-          <p>Confira os perfumes que você selecionou.</p>
+
+          <h2>
+            Minha sacola
+          </h2>
+
+          <p>
+            Confira os perfumes que você selecionou.
+          </p>
 
           {carrinho.length === 0 ? (
+
             <div className="empty-cart">
+
               <span>🛍️</span>
-              <h3>Sua sacola está vazia</h3>
-              <p>Escolha seus perfumes favoritos!</p>
+
+              <h3>
+                Sua sacola está vazia
+              </h3>
+
+              <p>
+                Escolha seus perfumes favoritos!
+              </p>
+
             </div>
+
           ) : (
+
             <>
+
               {carrinho.map((item) => (
+
                 <div className="cart-item" key={item.id}>
-                  <span>{item.emoji}</span>
+
+                  <span>
+                    {item.emoji}
+                  </span>
 
                   <div className="cart-info">
-                    <h3>{item.nome}</h3>
-                    <p>{item.marca}</p>
-                    <p>Quantidade: {item.quantidade}</p>
+
+                    <h3>
+                      {item.nome}
+                    </h3>
+
+                    <p>
+                      {item.marca}
+                    </p>
+
+                    <p>
+                      Quantidade: {item.quantidade}
+                    </p>
 
                     <strong>
                       {formatarPreco(item.preco * item.quantidade)}
                     </strong>
+
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => removerDoCarrinho(item.id)}
                   >
                     Remover
                   </button>
+
                 </div>
+
               ))}
 
               <div className="cart-summary">
+
                 <h3>
                   Total: {formatarPreco(totalCarrinho)}
                 </h3>
 
-                <button onClick={finalizarCompra}>
+                <button
+                  type="button"
+                  onClick={finalizarCompra}
+                >
                   Finalizar pedido pelo WhatsApp
                 </button>
+
               </div>
+
             </>
+
           )}
+
         </section>
 
         {/* NEWSLETTER */}
+
         <section className="newsletter">
-          <h2>Receba novidades e ofertas especiais</h2>
+
+          <h2>
+            Receba novidades e ofertas especiais
+          </h2>
 
           <p>
             Fique por dentro dos lançamentos e descubra novas fragrâncias.
           </p>
 
           <div>
+
             <input
               type="email"
               placeholder="Digite seu melhor e-mail"
             />
 
-            <button>Inscrever-se</button>
+            <button type="button">
+              Inscrever-se
+            </button>
+
           </div>
+
         </section>
 
       </main>
 
-      {/* FOOTER */}
+      {/* RODAPÉ */}
+
       <footer className="footer">
+
         <div>
-          <h2>ANA PAULA <span>PERFUMES</span></h2>
-          <p>Perfume é a sua essência.</p>
-          <p>Encontre fragrâncias que combinam com você.</p>
+
+          <h2>
+            ANA PAULA <span>PERFUMES</span>
+          </h2>
+
+          <p>
+            Perfume é a sua essência.
+          </p>
+
+          <p>
+            Encontre fragrâncias que combinam com você.
+          </p>
+
         </div>
 
         <div>
-          <h3>Navegação</h3>
-          <a href="#">Início</a>
-          <a href="#produtos">Perfumes</a>
-          <a href="#carrinho">Minha sacola</a>
+
+          <h3>
+            Navegação
+          </h3>
+
+          <a href="#inicio">
+            Início
+          </a>
+
+          <a href="#produtos">
+            Perfumes
+          </a>
+
+          <a href="#carrinho">
+            Minha sacola
+          </a>
+
         </div>
 
         <div>
-          <h3>Categorias</h3>
+
+          <h3>
+            Categorias
+          </h3>
 
           <a
             href="#produtos"
-            onClick={() => setCategoriaSelecionada('Feminino')}
+            onClick={() => selecionarCategoria('Feminino')}
           >
             Femininos
           </a>
 
           <a
             href="#produtos"
-            onClick={() => setCategoriaSelecionada('Masculino')}
+            onClick={() => selecionarCategoria('Masculino')}
           >
             Masculinos
           </a>
+
         </div>
 
         <div>
-          <h3>Atendimento</h3>
-          <a href="#">Fale conosco</a>
-          <a href="#">Instagram</a>
-          <a href="#">Política de privacidade</a>
+
+          <h3>
+            Atendimento
+          </h3>
+
+          <a href="#carrinho">
+            Fale conosco
+          </a>
+
+          <a href="#">
+            Instagram
+          </a>
+
+          <a href="#">
+            Política de privacidade
+          </a>
+
         </div>
 
         <p className="copyright">
           © 2026 Ana Paula Perfumes. Todos os direitos reservados.
         </p>
+
       </footer>
 
     </div>
